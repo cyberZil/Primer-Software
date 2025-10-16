@@ -22,6 +22,11 @@ sudo apt upgrade -y
 ```bash
 sudo apt install git -y
 ```
+**(Best practice) create a projects folder in your **
+```
+mkdir -p projects
+cd projects
+```
 
 **Clone the Project:**
 ```bash
@@ -39,7 +44,6 @@ sudo apt install python3.12 python3.12-venv -y
 **Verify Installation:**
 ```bash
 python3.12 --version
-# Output should be: Python 3.12.x
 ```
 
 ### 2.3. Installing Ollama
