@@ -46,6 +46,13 @@ sudo apt install python3.12 python3.12-venv -y
 python3.12 --version
 ```
 
+**Essential Installs:**
+```bash
+sudo apt install build-essentials
+sudo apt install python3-dev
+sudo apt install portaudio19-dev
+```
+
 ### 2.3. Installing Ollama
 
 Ollama is the core LLM serving application. Its installer script automatically handles architecture detection for the ARM platform.
@@ -117,5 +124,5 @@ The Rubik Pi 3 is now fully configured.
 
 Now that the virtual enviornment is active with all the needed dependancies, you can run the example file
 ```bash
-sudo ./venv/bin/python src/render-avatar.py
+sudo ./venv/bin/python src/primer.py
 ```
