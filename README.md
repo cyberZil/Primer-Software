@@ -48,9 +48,7 @@ python3.12 --version
 
 **Essential Installs:**
 ```bash
-sudo apt install build-essentials
-sudo apt install python3-dev
-sudo apt install portaudio19-dev
+sudo apt install -y build-essentials python3-dev libportaudio2 portaudio19-dev
 ```
 
 ### 2.3. Installing Ollama
