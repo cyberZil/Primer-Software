@@ -107,6 +107,57 @@ EOF
     echo "-------------------------"
 }
 
+# Grants the current user persistent read/write access to SPI devices via udev rules and group membership.
+setup_spi_permissions() {
+    info "Starting SPI device permissions setup..."
+
+    # --- CONFIGURATION ---
+    local SPI_DEVICE="spidev0.0"  # The specific SPI device file name (e.g., spidev0.0)
+    local UDEV_RULE_FILE="/etc/udev/rules.d/99-spi-access.rules"
+    local SPI_GROUP="spi"
+    local CURRENT_USER=$(whoami)
+    # ---------------------
+
+    echo "--- Granting $CURRENT_USER access to SPI devices ---"
+
+    # 1. Create the 'spi' group if it doesn't exist
+    info "1. Creating group '$SPI_GROUP' (if it doesn't exist)..."
+    sudo groupadd -f $SPI_GROUP
+    check_status "Creating group '$SPI_GROUP'"
+
+    # 2. Add the current user to the 'spi' group
+    info "2. Adding user '$CURRENT_USER' to group '$SPI_GROUP'..."
+    # The -a (append) and -G (groups) options add the user to the specified group without removing them from others.
+    sudo usermod -a -G $SPI_GROUP $CURRENT_USER
+    check_status "Adding user to group '$SPI_GROUP'"
+
+    # 3. Create a persistent udev rule
+    info "3. Creating udev rule to set permissions on boot..."
+    # The rule sets the ownership group for all spidev devices to 'spi' with read/write access (MODE="0660").
+    echo "SUBSYSTEM==\"spidev\", MODE=\"0660\", GROUP=\"$SPI_GROUP\"" | sudo tee $UDEV_RULE_FILE > /dev/null
+    check_status "Creating udev rule file"
+
+    # 4. Apply the new udev rules immediately
+    info "4. Reloading and triggering udev rules for immediate effect..."
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    check_status "Applying udev rules"
+
+    # 5. Verify the new device permissions
+    echo "5. Verifying permissions for $SPI_DEVICE (look for 'rw-rw----' and group 'spi')..."
+    # Check if the device exists before listing
+    if [ -e "/dev/$SPI_DEVICE" ]; then
+        ls -l /dev/$SPI_DEVICE
+    else
+        warn "/dev/$SPI_DEVICE not found. Permissions will apply when the device is created/enabled."
+    fi
+
+    # 6. Final Instructions
+    success "SPI Permissions setup is complete."
+    warn "⚠️ IMPORTANT: You must **log out and log back in** (or reboot) for your user's new group membership to take effect."
+    echo "Once logged back in, you should be able to run your script without 'sudo' for SPI access."
+}
+
 # -----------------------------------------------------------------------------
 ## 1. Configure System Session Settings (Screen Blanking & Auto-Login)
 # -----------------------------------------------------------------------------
@@ -141,7 +192,12 @@ check_status "Installing required packages"
 success "System dependencies installed."
 
 # -----------------------------------------------------------------------------
-## 3. Clone Repository and Setup Python Virtual Environment
+## 3. Configure SPI Device Permissions
+# -----------------------------------------------------------------------------
+setup_spi_permissions
+
+# -----------------------------------------------------------------------------
+## 4. Clone Repository and Setup Python Virtual Environment
 # -----------------------------------------------------------------------------
 info "Ensuring projects directory structure exists..."
 mkdir -p "$PROJECTS_DIR"
@@ -182,7 +238,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-## 4. Install Ollama and Download TinyLlama Model
+## 5. Install Ollama and Download TinyLlama Model
 # -----------------------------------------------------------------------------
 if ! command -v ollama >/dev/null 2>&1; then
     info "Installing Ollama..."
@@ -198,7 +254,7 @@ OLLAMA_PID=$!
 warn "TinyLlama download started (PID: $OLLAMA_PID). It may take time, but the script will continue."
 
 # -----------------------------------------------------------------------------
-## 5. Download Whisper Models (ONNX)
+## 6. Download Whisper Models (ONNX)
 # -----------------------------------------------------------------------------
 info "Setting up Whisper ONNX models..."
 
@@ -212,12 +268,12 @@ download_model "$DECODER_URL" "$WHISPER_DIR/decoder_model.onnx"
 download_model "$ENCODER_URL" "$WHISPER_DIR/encoder_model.onnx"
 
 # -----------------------------------------------------------------------------
-## 6. Configure Autostart on Login
+## 7. Configure Autostart on Login
 # -----------------------------------------------------------------------------
 setup_autostart
 
 # -----------------------------------------------------------------------------
-## 7. Final Instructions
+## 8. Final Instructions
 # -----------------------------------------------------------------------------
 success "Installation complete!"
 echo
@@ -228,4 +284,4 @@ echo "3. Run the script (use sudo if GPIO access is required):"
 echo "   sudo $PYTHON_BIN src/primer.py"
 echo
 warn "The system is configured for automatic login and autostart on the next boot."
-warn "You may need to log out and back in, or reboot, for changes to take full effect."
+warn "You may need to log out and back in, or reboot, for changes to take full effect (especially for the new SPI permissions)."
