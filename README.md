@@ -13,6 +13,7 @@ Soon:
 - launch the demo as a service during boot.
 - look into how photonvision does[ software distribution]([url](https://github.com/PhotonVision/photon-image-modifier/blob/main/.github/workflows/main.yml))
 - look into python [uv]([url](https://docs.astral.sh/uv/))
+
 Future Plans:
 - Serialized display writes should be possible for instant llm output
 - [improving the speech to text]([url](https://aihub.qualcomm.com/iot/models/whisper_small_quantized?domain=Audio&useCase=Speech+Recognition&chipsets=qualcomm-qcs6490-proxy)) (or with Voxel?).
