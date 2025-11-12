@@ -4,6 +4,20 @@
 
 This repository provides a guide for setting up a local Large Language Model (LLM) serving environment on a Rubik Pi 3 (RPi3), utilizing Ubuntu Server, Python 3.12, and the Ollama framework.
 
+## TODO:
+
+Soon:
+- LLM running on the NPU.
+- solve the user permissions problem.
+- look into S3 Bucket for redistributing large models
+- launch the demo as a service during boot.
+- look into how photonvision does[ software distribution]([url](https://github.com/PhotonVision/photon-image-modifier/blob/main/.github/workflows/main.yml))
+- look into python [uv]([url](https://docs.astral.sh/uv/))
+Future Plans:
+- Serialized display writes should be possible for instant llm output
+- [improving the speech to text]([url](https://aihub.qualcomm.com/iot/models/whisper_small_quantized?domain=Audio&useCase=Speech+Recognition&chipsets=qualcomm-qcs6490-proxy)) (or with Voxel?).
+- RAG retrieval.
+
 ## 1. Initial Hardware Setup: Ubuntu OS on the Rubik Pi 3
 
 The first step is to follow [this guide](https://www.thundercomm.com/rubik-pi-3/en/docs/rubik-pi-3-user-manual/1.0.0-u/Update-Software/3.2.Flash-using-Qualcomm-Launcher) to install Ubuntu Server on the Rubik Pi 3. Then follow [these instructions](https://www.thundercomm.com/rubik-pi-3/en/docs/rubik-pi-3-user-manual/1.0.0-u/Troubleshooting/11.3.ubuntu-desktop-vs-server/#switch-from-ubuntu-desktop-version-to-server-version) to switch to ubuntu desktop.
