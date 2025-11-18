@@ -113,14 +113,6 @@ wget -P lib/whisper https://huggingface.co/onnx-community/whisper-tiny.en/resolv
 
 ## 3. Python Development Environment
 
-### 3.0 install system requirement library
-
-```bash
-sudo usermod -a -G gpio ubuntu
-```
-
-### 3.1. Creating a Virtual Environment (venv)
-
 Isolating dependencies in a virtual environment is essential for project stability.
 
 **Create Venv using Python 3.12:**
@@ -134,8 +126,6 @@ source venv/bin/activate
 ```
 > **Note**: Your command prompt will change (e.g., `(venv)user@host:~...`) indicating the environment is active. You must run this command every time you open a new terminal session.
 
-### 3.2. Installing Dependencies
-
 Install all necessary libraries defined in the `requirements.txt` file.
 
 **Install Packages:**
@@ -145,7 +135,7 @@ pip install -r requirements.txt
 
 The Rubik Pi 3 is now fully configured.
 
-### 3.3. Run the Demo
+### 4. Run the Demo
 
 Now that the virtual enviornment is active with all the needed dependancies, you can test speech to text by running:
 ```bash
