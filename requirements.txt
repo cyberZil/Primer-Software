@@ -11,3 +11,4 @@ transformers
 python-periphery
 Pillow
 webrtcvad
+requests

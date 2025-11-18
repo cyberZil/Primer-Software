@@ -8,7 +8,7 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=__PROJECT_PATH__
-ExecStart=__PROJECT_PATH__/venv/bin/python __PROJECT_PATH__/src/primer.py
+ExecStart= -E __PROJECT_PATH__/venv/bin/python __PROJECT_PATH__/src/primer.py
 Restart=on-failure
 RestartSec=1
 
