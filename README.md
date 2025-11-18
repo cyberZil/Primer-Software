@@ -33,15 +33,9 @@ Please read the official documentation linked above very closely. That said, her
 	- you will be asked to change the default password
 	- reccomended new password: xrpaikit
 	- you will be asked to setup a connection to a local wifi network (important)
-- Use your host machine to connect to the Rubik Pi via UART with Putty
-	- find COM in Device manager, Baud is 115200
-	- run the following commands
-		- sudo apt install qcom-adreno1- libgbm-msm1- libegl-mesa0 libegl1 libgles2 libglvnd0 libvulkan1 weston-
-		- sudo apt update --fix-missing
-		- sudo apt install ubuntu-desktop
-		- sudo apt update --fix-missing
-		- sudo reboot
-- You can now plug HDMI/mouse/keyboard into the Rubik Pi and access the desktop environment
+ 	- In your terminal, run the command Qualcomm-Launcher gives you to SSH into the Rubik Pi
+- Once you Are SShed into the Pi, Log in to the ubuntu user
+- Go to the next steps, run those commands on the PI
 
 ## 2. Setting Up the Development Environment
 
