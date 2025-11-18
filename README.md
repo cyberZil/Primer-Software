@@ -63,8 +63,6 @@ git clone https://github.com/XRP-AI-Kit/Primer-Software
 cd Primer-Software
 ```
 
-### 2.2. Installing Python 3.12
-
 **Install Python 3.12 and Venv Module:**
 ```bash
 sudo apt install python3.12 python3.12-venv -y
@@ -80,8 +78,6 @@ python3.12 --version
 sudo apt install -y build-essential python3-dev libportaudio2 portaudio19-dev
 ```
 
-### 2.3. Installing Ollama
-
 Ollama is the core LLM serving application. Its installer script automatically handles architecture detection for the ARM platform.
 
 **Execute the Ollama Installer:**
@@ -95,25 +91,31 @@ Check that the Ollama service is running in the background.
 systemctl status ollama
 ```
 
-**Run a Test Model:**
-Download a lightweight model to confirm functionality. (Due to RPi3's 1GB RAM, always choose small, highly quantized models like `tinyllama`).
+**Download Tinyllama:**
 ```bash
-ollama run tinyllama
+ollama pull tinyllama
 ```
-Type `/bye` to exit the interactive session.
 
-## 2.4 Whisper Model Setup
-
-**1. Download the Models:**
+**Download the whisper-tiny Models:**
 Download the whisper models by running the following commands:
 ```bash
 wget -P lib/whisper https://huggingface.co/onnx-community/whisper-tiny.en/resolve/main/onnx/decoder_model.onnx
 wget -P lib/whisper https://huggingface.co/onnx-community/whisper-tiny.en/resolve/main/onnx/encoder_model.onnx
 ```
+## 3. Add service to automate running at startup
 
-## 3. Python Development Environment
+**Move primer.service to the system folder**
+```bash
+sudo sed "/home/ubuntu/projects/Primer_Software" "primer.service" > "/etc/systemd/system/primer.service"
+```
 
-Isolating dependencies in a virtual environment is essential for project stability.
+**Reload and enable the service**
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable primer.service
+```
+
+## 4. Python Development Environment
 
 **Create Venv using Python 3.12:**
 ```bash
@@ -135,17 +137,14 @@ pip install -r requirements.txt
 
 The Rubik Pi 3 is now fully configured.
 
-### 4. Run the Demo
+## 5. Run the Demo
 
-Now that the virtual enviornment is active with all the needed dependancies, you can test speech to text by running:
+You can start the service manually now with:
 ```bash
-./venv/bin/python src/whisper_prompt.py
+sudo systemctl start primer.service
 ```
-or the language model with:
+
+Or reboot the device to have it start automatically:
 ```bash
-./venv/bin/python src/ollama_chat.py
-```
-if you want to test the display, you can with:
-```bash
-sudo ./venv/bin/python src/render_avatar.py
+sudo reboot
 ```
