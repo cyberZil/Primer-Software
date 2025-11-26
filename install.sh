@@ -7,10 +7,10 @@ set -e # Exit on error
 set -u # Treat unset vars as errors
 
 # --- COLOR OUTPUT HELPERS ---
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*" >&2; }
+function info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+function success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
+function warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+function error()   { echo -e "\033[1;31m[ERROR]\033[0m $*" 1>&2; }
 
 # --- STEP 1: System Update ---
 info "Updating system packages..."
@@ -222,10 +222,6 @@ SERVICE_DEST="/etc/systemd/system/primer.service"
  
 info "Copying service file and setting correct project path..."
 sudo sed "s|__PROJECT_PATH__|$PROJECT_PATH|g" "$SERVICE_SRC" | sudo tee "$SERVICE_DEST" > /dev/null
- 
-info "Reloading systemd daemon and enabling the Primer service..."
-sudo systemctl daemon-reload
-sudo systemctl enable primer.service
  
 # --- STEP 12: Final instructions ---
 success "Installation complete!"
