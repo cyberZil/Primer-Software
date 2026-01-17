@@ -330,3 +330,4 @@ def wait_for_prompt(trigger_word: str, runner, device=None):
     except KeyboardInterrupt:
         print("\nListening stopped by user (KeyboardInterrupt).")
         return None
+    
