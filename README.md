@@ -93,7 +93,7 @@ systemctl status ollama
 
 **Download Tinyllama:**
 ```bash
-ollama pull tinyllama
+ollama pull gemma3:1b
 ```
 
 **Download the whisper-tiny Models:**
