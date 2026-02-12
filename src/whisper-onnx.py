@@ -1,9 +1,3 @@
-# This script demonstrates how to use the Whisper-tiny.en model with ONNX Runtime
-# for speech-to-text transcription. It now includes live audio recording with
-# voice activity detection (VAD).
-
-# Before running, you must install the required libraries:
-# pip install onnxruntime numpy soundfile webrtcvad
 
 #!/usr/bin/env python3
 """
@@ -15,41 +9,22 @@ Minimal Whisper-ONNX runner that uses:
 Recommended decoder: decoder_model.onnx (plain)
 Optional: decoder_model_merged.onnx (with past_key_values + use_cache_branch)
 """
-# Before running, you must install the required libraries:
-# pip install "optimum-onnx[onnxruntime]" transformers onnx optimum-cli export onnx --model openai/whisper-tiny-en whisper_tiny_en
-# cp encoder_model.onnx and decoder_model.onnx from the export output to /lib/whisper
 
-import onnxruntime as ort
-print("ONNX Runtime version:", ort.__version__)
-print("Imported from:", ort.__file__)
-print(ort.get_available_providers())
+import argparse
+import os
+import sys
+import time
+from datetime import datetime
+
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
-import webrtcvad
-import os
-import sys
-import wave
-import time
-import whisper
-
-ENCODER_MODEL = "encoder_model.onnx"
-DECODER_MODEL = "decoder_model.onnx"
-#ENCODER_MODEL = "encoder_small_quantized.onnx"
-#DECODER_MODEL = "decoder_small_quantized.onnx"
-MODEL_DIR_PATH = "/home/ubuntu/projects/Primer-Software/lib/whisper"
-RECORD_FILE = "recording.wav"
-
-qnn_opts = {
-    "backend_type": "htp",  
-    }
-
-print("QNN provider options:", qnn_opts)
-providers = [("QNNExecutionProvider", qnn_opts),               
-            ("CPUExecutionProvider", {})]
+import onnxruntime as ort
+import torch
+import whisper  # pre/post processing only
 
 # ---------- Audio helpers ----------
-def _list_devices():
+def list_devices():
     devices = sd.query_devices()
     lines = []
     for idx, d in enumerate(devices):
@@ -57,17 +32,26 @@ def _list_devices():
             lines.append(f"[{idx}] {d['name']} - inputs: {d['max_input_channels']}, samplerate: {int(d['default_samplerate'])}")
     return "\n".join(lines) if lines else "No input devices found."
 
-# --- VAD / streaming parameters to align with Whisper + VAD ---
-SAMPLE_RATE = 16000           # Whisper + WebRTC VAD standard
-CHANNELS = 1                  # mono
-FRAME_DURATION_MS = 20        # 10, 20, or 30 ms (20 ms recommended)
-CHUNK = int(SAMPLE_RATE * FRAME_DURATION_MS / 1000)  # samples per frame (320 for 20 ms)
-VAD_AGGRESSIVENESS = 2        # 0..3
-SILENCE_TIMEOUT_MS = 800
-SILENCE_TIMEOUT_FRAMES = max(1, SILENCE_TIMEOUT_MS // FRAME_DURATION_MS)
-MAX_RECORD_SECONDS = 12
+def record_wav(outfile: str, duration_sec: float, samplerate: int = 16000, channels: int = 1, device=None):
+    print(f"⏺️ Recording {duration_sec:.1f}s @ {samplerate} Hz ({channels} ch)")
+    if device is not None:
+        print(f"🎛️ Input device: {device}")
+    try:
+        sd.check_input_settings(device=device, samplerate=samplerate, channels=channels)
+    except Exception as e:
+        print("⚠️ Device check failed:", e)
+        print("Available input devices:\n", list_devices())
+        sys.exit(1)
 
-_vad = webrtcvad.Vad(VAD_AGGRESSIVENESS)
+    frames = int(duration_sec * samplerate)
+    print("🎤 Speak now…")
+    start = time.time()
+    recording = sd.rec(frames=frames, samplerate=samplerate, channels=channels, dtype="float32", device=device)
+    sd.wait()
+    elapsed = time.time() - start
+    print(f"✅ Recording complete ({elapsed:.2f}s). Saving to {outfile}")
+    sf.write(outfile, recording, samplerate, subtype="PCM_16")
+    print(f"💾 Saved: {os.path.abspath(outfile)}")
 
 # ---------- Whisper-ONNX runner ----------
 class WhisperONNXRunner:
@@ -78,24 +62,24 @@ class WhisperONNXRunner:
     Uses Whisper's official pre/post for consistency with the original pipeline.
     """
 
-    def __init__(self):
+    def __init__(self, model_dir: str, decoder_file: str = "decoder_model.onnx", providers: str = "cpu"):
         # Locate ONNX files
-        enc_path = os.path.join(MODEL_DIR_PATH, ENCODER_MODEL)
-        dec_path = os.path.join(MODEL_DIR_PATH, DECODER_MODEL)
+        enc_path = os.path.join(model_dir, "encoder_model.onnx")
+        dec_path = os.path.join(model_dir, decoder_file)
         if not (os.path.isfile(enc_path) and os.path.isfile(dec_path)):
-            raise FileNotFoundError(f"Missing ONNX files under {MODEL_DIR_PATH}. Expected encoder_model.onnx and decoder_model.onnx")
+            raise FileNotFoundError(f"Missing ONNX files under {model_dir}. Expected encoder_model.onnx and {decoder_file}.")
 
-        print(f"🧩 Loading encoder + decoder")
-        options = ort.SessionOptions()
-        #options.log_severity_level = 0  # Suppress INFO/WARNING logs; only show ERROR
-        #options.log_verbosity_level = 1
-        print(f"🧩 Loading encoder + decoder")
-        self.encoder_sess = ort.InferenceSession(enc_path, sess_options=options, providers=providers)
-        print(f"🧩 Loading encoder + decoder")
-        self.decoder_sess = ort.InferenceSession(dec_path, sess_options=options, providers=providers)
-        actual_providers = self.encoder_sess.get_providers()
-        print(f"✅ ONNX Runtime providers: {actual_providers}")
-        print("ONNX models and processor loaded successfully.")
+        # Providers
+        if providers.lower() == "cuda":
+            ep = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+        elif providers.lower() == "dml":
+            ep = ["DmlExecutionProvider", "CPUExecutionProvider"]
+        else:
+            ep = ["CPUExecutionProvider"]
+
+        print(f"🧩 Loading encoder + decoder ({providers})…")
+        self.encoder_sess = ort.InferenceSession(enc_path, providers=ep)
+        self.decoder_sess = ort.InferenceSession(dec_path, providers=ep)
 
         # Tokenizer (English-only tiny.en)
         self.tokenizer = whisper.tokenizer.get_tokenizer(multilingual=False)
@@ -184,6 +168,7 @@ class WhisperONNXRunner:
                 next_past[past_name] = arr
         return next_past
 
+    # --- transcription ---
     def transcribe(self, audio_path: str, max_tokens: int = 448, skip_special_tokens: bool = True) -> str:
         # 1) Pre: log-mel via OpenAI Whisper
         mel = self._mel(audio_path)
@@ -236,130 +221,39 @@ class WhisperONNXRunner:
                 past = self._update_past_from_present(dec_out)
 
         # 4) Post: Whisper tokenizer -> text
-        return self.tokenizer.decode(tokens).strip()
+        return self.tokenizer.decode(tokens, skip_special_tokens=skip_special_tokens).strip()
 
-def _record_audio_chunk_sd(device=None):
-    """
-    Records a single chunk of speech using WebRTC VAD with sounddevice.
-    Starts when speech is detected and stops after trailing silence or max time.
-    Returns path to a temp WAV (16-bit PCM, mono, 16k) or None if no speech.
-    """
-    try:
-        sd.check_input_settings(device=device, samplerate=SAMPLE_RATE, channels=CHANNELS, dtype='int16')
-    except Exception as e:
-        print("Device check failed:", e)
-        print("Available input devices:\n", _list_devices())
-        return None
-
-    print("  Listening for speech to start…")
-    frames_bytes = []
-    speaking = False
-    silence_frames = 0
-    total_frames = 0
-    max_frames = int(MAX_RECORD_SECONDS * 1000 / FRAME_DURATION_MS)
-
-    with sd.RawInputStream(samplerate=SAMPLE_RATE,
-                           blocksize=CHUNK,
-                           channels=CHANNELS,
-                           dtype='int16',
-                           device=device) as stream:
-        while True:
-            data, overflowed = stream.read(CHUNK)  # raw bytes (int16 mono)
-            is_speech = _vad.is_speech(data, SAMPLE_RATE)
-
-            if not speaking:
-                if is_speech:
-                    print("  Speech detected. Recording…")
-                    speaking = True
-                    frames_bytes.append(data)
-                continue
-
-            frames_bytes.append(data)
-            silence_frames = 0 if is_speech else (silence_frames + 1)
-            total_frames += 1
-
-            if silence_frames > SILENCE_TIMEOUT_FRAMES:
-                print(f"  Detected {(silence_frames * FRAME_DURATION_MS) / 1000:.2f}s of silence. Chunk finished.")
-                break
-            if total_frames >= max_frames:
-                print("  Maximum recording time reached. Stopping chunk.")
-                break
-
-    if not frames_bytes:
-        print("  No speech was recorded in this chunk.")
-        return None
-
-    # Save the captured bytes as a WAV file compatible with your playback & Whisper
-    temp_file = f"recorded_chunk_{int(time.time())}.wav"
-    with wave.open(temp_file, 'wb') as wf:
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(2)  # int16
-        wf.setframerate(SAMPLE_RATE)
-        wf.writeframes(b''.join(frames_bytes))
-
-    print(f"  Audio chunk saved to '{temp_file}'")
-
-    return temp_file
-
-def _record_and_transcribe_chunk(runner, device=None):
-        """
-        Record a VAD chunk → transcribe with WhisperONNXRunner → cleanup temp WAV.
-        Returns transcription string or None.
-        """
-        audio_path = _record_audio_chunk_sd(device=device)
-        if not audio_path:
-            return None
-        try:
-            text = runner.transcribe(audio_path)
-        finally:
-            try:
-                os.remove(audio_path)
-            except Exception:
-                pass
-        return text
-
-def wait_for_prompt(trigger_word: str, runner, device=None):
-    """
-    Loop: record chunk -> transcribe -> return full transcription once it contains trigger_word.
-    Returns the transcription (prompt) string, or None on KeyboardInterrupt.
-    """
-    print(f"\n--- Awaiting Trigger Word: '{trigger_word.upper()}' ---")
-    try:
-        while True:
-            prompt = _record_and_transcribe_chunk(runner, device=device)
-            if prompt:
-                if trigger_word.lower() in prompt.lower():
-                    print("\n!!! Trigger Word Detected !!!")
-                    print(f"Full Prompt: {prompt.strip()}")
-                    return prompt.strip()
-                else:
-                    print(f"Prompt thrown out (no '{trigger_word}' detected). Re-listening.")
-                    print("-" * 30)
-            else:
-                print("No clear speech detected. Re-listening.")
-                print("-" * 30)
-    except KeyboardInterrupt:
-        print("\nListening stopped by user (KeyboardInterrupt).")
-        return None
-
-def get_question(runner, device=None):
-    try:
-        while True:
-            prompt = _record_and_transcribe_chunk(runner, device=device)
-            print(f"Full Prompt: {prompt.strip()}")
-            return prompt
-        
-    except KeyboardInterrupt:
-        print("\nListening stopped by user (KeyboardInterrupt).")
-        return None
-
+# ---------- CLI ----------
 def main():
-    runner = WhisperONNXRunner()
-    prompt = get_question(runner, device=None)  
-    if prompt:
-        print(f"\nFinal Prompt Received: {prompt}")
-    else:
-        print("\nNo prompt received.")  
+    parser = argparse.ArgumentParser(description="Whisper tiny.en ONNX runner (OpenAI pre/post)")
+    parser.add_argument("--duration", type=float, default=10.0, help="Recording duration in seconds (default: 10)")
+    parser.add_argument("--samplerate", type=int, default=16000, help="Sample rate Hz (default: 16000)")
+    parser.add_argument("--channels", type=int, default=1, help="Channels (default: 1 mono)")
+    parser.add_argument("--outfile", type=str, default="recording.wav", help="Output WAV filename (default: recording.wav)")
+    parser.add_argument("--device", type=str, default=None, help="Input device index or name (optional)")
+    parser.add_argument("--model-dir", type=str, required=True, help="Directory containing ONNX export")
+    parser.add_argument("--decoder", type=str, default="decoder_model.onnx",
+                        help="Decoder filename: decoder_model.onnx (plain) or decoder_model_merged.onnx (merged)")
+    parser.add_argument("--providers", type=str, default="cpu", choices=["cpu", "cuda", "dml"],
+                        help="ONNX Runtime EP (cpu|cuda|dml)")
+    parser.add_argument("--list-devices", action="store_true", help="List input devices and exit")
 
-if __name__ == '__main__':
+    args = parser.parse_args()
+    if args.list_devices:
+        print("Available input devices:")
+        print(list_devices())
+        return
+
+    if args.outfile.endswith(os.sep):
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        args.outfile = os.path.join(args.outfile, f"recording_{ts}.wav")
+
+    record_wav(args.outfile, args.duration, args.samplerate, args.channels, device=args.device)
+    runner = WhisperONNXRunner(model_dir=args.model_dir, decoder_file=args.decoder, providers=args.providers)
+    text = runner.transcribe(args.outfile)
+    print("\n=== TRANSCRIPTION ===")
+    print(text)
+
+if __name__ == "__main__":
     main()
+

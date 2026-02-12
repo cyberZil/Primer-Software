@@ -1,0 +1,194 @@
+ONNX models and processor loaded successfully.
+An unexpected error occurred in the main loop: Decoder missing required inputs: found ['input_ids', 'attention_mask', 'k_cache_self_0_in', 'v_cache_self_0_in', 'k_cache_self_1_in', 'v_cache_self_1_in', 'k_cache_self_2_in', 'v_cache_self_2_in', 'k_cache_self_3_in', 'v_cache_self_3_in', 'k_cache_self_4_in', 'v_cache_self_4_in', 'k_cache_self_5_in', 'v_cache_self_5_in', 'k_cache_self_6_in', 'v_cache_self_6_in', 'k_cache_self_7_in', 'v_cache_self_7_in', 'k_cache_self_8_in', 'v_cache_self_8_in', 'k_cache_self_9_in', 'v_cache_self_9_in', 'k_cache_self_10_in', 'v_cache_self_10_in', 'k_cache_self_11_in', 'v_cache_self_11_in', 'k_cache_cross_0', 'v_cache_cross_0', 'k_cache_cross_1', 'v_cache_cross_1', 'k_cache_cross_2', 'v_cache_cross_2', 'k_cache_cross_3', 'v_cache_cross_3', 'k_cache_cross_4', 'v_cache_cross_4', 'k_cache_cross_5', 'v_cache_cross_5', 'k_cache_cross_6', 'v_cache_cross_6', 'k_cache_cross_7', 'v_cache_cross_7', 'k_cache_cross_8', 'v_cache_cross_8', 'k_cache_cross_9', 'v_cache_cross_9', 'k_cache_cross_10', 'v_cache_cross_10', 'k_cache_cross_11', 'v_cache_cross_11', 'position_ids']
+/prj/qct/webtech_scratch20/mlg_user_admin/qaisw_source_repo/rel/qairt-2.40.0/release/snpe_src/avante-tools/prebuilt/dsp/hexagon-sdk-5.5.5/ipc/fastrpc/rpcmem/src/rpcmem_android.c:42:dummy call to rpcmem_deinit, rpcmem APIs will be used from libxdsprpc
+
+/prj/qct/webtech_scratch20/mlg_user_admin/qaisw_source_repo/rel/qairt-2.40.0/release/snpe_src/avante-tools/prebuilt/dsp/hexagon-sdk-5.5.5/ipc/fastrpc/rpcmem/src/rpcmem_android.c:38:dummy call to rpcmem_init, rpcmem APIs will be used from libxdsprpc
+2026-02-10 00:03:41.636249596 [E:onnxruntime:, onnx_ctx_model_helper.cc:191 LoadQnnCtxFromOnnxGraph] Failed to load from EpContext model. The file path in ep_cache_context does not exist or is not accessible.
+An unexpected error occurred in the main loop: [ONNXRuntimeError] : 10 : INVALID_GRAPH : Failed to load from EpContext model. The file path in ep_cache_context does not exist or is not accessible.
+/prj/qct/webtech_scratch20/mlg_user_admin/qaisw_source_repo/rel/qairt-2.40.0/release/snpe_src/avante-tools/prebuilt/dsp/hexagon-sdk-5.5.5/ipc/fastrpc/rpcmem/src/rpcmem_android.c:42:dummy call to rpcmem_deinit, rpcmem APIs will be used from libxdsprpc
+
+ENCODER_MODEL = "encoder_small_quantized.onnx"
+DECODER_MODEL = "decoder_small_quantized.onnx"
+MODEL_DIR_PATH = "/home/ubuntu/projects/Primer-Software/lib/whisper"
+RECORD_FILE = "recording.wav"
+
+providers = [("QNNExecutionProvider", 
+              { "backend_type": "htp"}),               
+            ("CPUExecutionProvider", {})]
+
+enc_path = os.path.join(MODEL_DIR_PATH, ENCODER_MODEL)
+dec_path = os.path.join(MODEL_DIR_PATH, DECODER_MODEL)
+if not (os.path.isfile(enc_path) and os.path.isfile(dec_path)):
+    raise FileNotFoundError(f"Missing ONNX files under {MODEL_DIR_PATH}. Expected encoder_model.onnx and decoder_model.onnx")
+
+print(f"🧩 Loading encoder + decoder")
+options = ort.SessionOptions()
+print(f"🧩 Loading encoder + decoder")
+self.encoder_sess = ort.InferenceSession(enc_path, sess_options=options, providers=providers)
+print(f"🧩 Loading encoder + decoder")
+self.decoder_sess = ort.InferenceSession(dec_path, sess_options=options, providers=providers)
+
+
+[I:onnxruntime:, inference_session.cc:606 TraceSessionOptions] 
+    Session Options {   execution_mode:0 
+                        execution_order:DEFAULT 
+                        enable_profiling:0 
+                        optimized_model_filepath:"" 
+                        enable_mem_pattern:1 
+                        enable_mem_reuse:1 
+                        enable_cpu_mem_arena:1 
+                        profile_file_prefix:onnxruntime_profile_ 
+                        session_logid: 
+                        session_log_severity_level:0 
+                        session_log_verbosity_level:1 
+                        max_num_graph_transformation_steps:10 
+                        graph_optimization_level:4 
+                        intra_op_param:OrtThreadPoolParams { thread_pool_size: 0 
+                                                            auto_set_affinity: 0 
+                                                            allow_spinning: 1 
+                                                            dynamic_block_base_: 0 
+                                                            stack_size: 0 
+                                                            affinity_str:  
+                                                            set_denormal_as_zero: 0 
+                                                            } 
+                        inter_op_param:OrtThreadPoolParams { 
+                                            thread_pool_size: 0 
+                                            auto_set_affinity: 0 
+                                            allow_spinning: 1 
+                                            dynamic_block_base_: 0 
+                                            stack_size: 0 
+                                            affinity_str:  
+                                            set_denormal_as_zero: 0 
+                                        } 
+                        use_per_session_threads:1 
+                        thread_pool_allow_spinning:1 
+                        use_deterministic_compute:0 
+                        ep_selection_policy:0 
+                        config_options: {  } 
+                    }
+[I:onnxruntime:, inference_session.cc:414 operator()] Flush-to-zero and denormal-as-zero are off
+[I:onnxruntime:, inference_session.cc:422 ConstructorCommon] Creating and using per session threadpools since use_per_session_threads_ is true
+2026-02-11 23:34:53.317968258 [I:onnxruntime:, inference_session.cc:446 ConstructorCommon] Dynamic block base set to 0
+2026-02-11 23:34:53.327367757 [I:onnxruntime:, inference_session.cc:2042 Initialize] Initializing session.
+2026-02-11 23:34:53.338792517 [I:onnxruntime:, graph_partitioner.cc:1209 InlineFunctionsAOT] This model does not have any local functions defined. AOT Inlining is not performed
+2026-02-11 23:34:53.339069229 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 0 with status: OK
+2026-02-11 23:34:53.339170477 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer Level1_RuleBasedTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.339237506 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer DoubleQDQPairsRemover modified: 0 with status: OK
+2026-02-11 23:34:53.339866657 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ConstantSharing modified: 0 with status: OK
+2026-02-11 23:34:53.340376071 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer CommonSubexpressionElimination modified: 0 with status: OK
+2026-02-11 23:34:53.340469818 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ConstantFolding modified: 0 with status: OK
+2026-02-11 23:34:53.340535963 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer MatMulAddFusion modified: 0 with status: OK
+2026-02-11 23:34:53.340597576 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ReshapeFusion modified: 0 with status: OK
+2026-02-11 23:34:53.340624658 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer FreeDimensionOverrideTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.340737416 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer GeluFusionL1 modified: 0 with status: OK
+2026-02-11 23:34:53.340812935 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer LayerNormFusionL1 modified: 0 with status: OK
+2026-02-11 23:34:53.341172769 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer QDQPropagationTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.341265215 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer WeightBiasQuantization modified: 0 with status: OK
+2026-02-11 23:34:53.341352921 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 0 with status: OK
+2026-02-11 23:34:53.341421461 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer RocmBlasAltImpl modified: 0 with status: OK
+2026-02-11 23:34:53.342579348 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer TransposeOptimizer modified: 1 with status: OK
+2026-02-11 23:34:53.343275788 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_11_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343344120 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_10_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343376411 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_10_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343405108 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_9_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343432451 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_11_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343458596 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_9_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343484221 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_9_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343510678 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_11_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343537084 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_8_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343563437 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_7_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343587030 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_7_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343608697 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_10_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343628384 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_6_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343646769 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_6_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343714423 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_11_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343734527 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_9_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343753016 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_3_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343772651 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_1_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343790775 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_2_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343807806 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_8_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343825670 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_0_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343848951 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_0_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343867023 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_0_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343884940 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'input_features_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343902699 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_10_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343920199 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_1_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343938532 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'input_features_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343955354 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_1_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.343973375 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_4_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.343992281 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_2_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344009988 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_0_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344026915 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_2_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344046446 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_8_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344067539 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_3_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344085716 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_2_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344104621 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_3_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344123058 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_5_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344159620 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_5_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344192744 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_3_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344220035 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_4_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344247691 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_8_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344274252 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_7_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344301127 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_4_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344328053 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_4_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344355552 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_7_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344375135 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_1_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344402426 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_5_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344428571 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_5_zp'. It is no longer used by any node.
+2026-02-11 23:34:53.344455915 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'k_cache_cross_6_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344482060 [I:onnxruntime:, graph.cc:4862 CleanUnusedInitializersAndNodeArgs] Removing initializer 'v_cache_cross_6_scale'. It is no longer used by any node.
+2026-02-11 23:34:53.344701794 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_0_token_23'. It is no longer used by any node.
+2026-02-11 23:34:53.344744293 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_0_token_22'. It is no longer used by any node.
+2026-02-11 23:34:53.345114023 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_2_token_19'. It is no longer used by any node.
+2026-02-11 23:34:53.345179906 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_2_token_18'. It is no longer used by any node.
+2026-02-11 23:34:53.345211468 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_3_token_17'. It is no longer used by any node.
+2026-02-11 23:34:53.345241051 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_3_token_16'. It is no longer used by any node.
+2026-02-11 23:34:53.345281727 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_4_token_14'. It is no longer used by any node.
+2026-02-11 23:34:53.345311049 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_6_token_11'. It is no longer used by any node.
+2026-02-11 23:34:53.345338704 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_7_token_9'. It is no longer used by any node.
+2026-02-11 23:34:53.345366256 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_8_token_7'. It is no longer used by any node.
+2026-02-11 23:34:53.345387141 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_8_token_6'. It is no longer used by any node.
+2026-02-11 23:34:53.345406515 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_9_token_4'. It is no longer used by any node.
+2026-02-11 23:34:53.345425681 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_10_token_2'. It is no longer used by any node.
+2026-02-11 23:34:53.345444691 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_11_token_1'. It is no longer used by any node.
+2026-02-11 23:34:53.345463233 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_10_token_3'. It is no longer used by any node.
+2026-02-11 23:34:53.345487971 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_5_token_13'. It is no longer used by any node.
+2026-02-11 23:34:53.345508231 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_4_token_15'. It is no longer used by any node.
+2026-02-11 23:34:53.345536668 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_6_token_10'. It is no longer used by any node.
+2026-02-11 23:34:53.345594219 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_1_token_21'. It is no longer used by any node.
+2026-02-11 23:34:53.345623385 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_5_token_12'. It is no longer used by any node.
+2026-02-11 23:34:53.345648957 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'k_cache_cross_9_token_5'. It is no longer used by any node.
+2026-02-11 23:34:53.345726247 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_1_token_20'. It is no longer used by any node.
+2026-02-11 23:34:53.345764527 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_7_token_8'. It is no longer used by any node.
+2026-02-11 23:34:53.345795776 [I:onnxruntime:, graph.cc:4925 CleanUnusedInitializersAndNodeArgs] Removing NodeArg 'v_cache_cross_11_token_0'. It is no longer used by any node.
+2026-02-11 23:34:53.345890149 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer Level1_RuleBasedTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.345921971 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer DoubleQDQPairsRemover modified: 0 with status: OK
+2026-02-11 23:34:53.345956501 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer CommonSubexpressionElimination modified: 0 with status: OK
+2026-02-11 23:34:53.345989313 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ConstantFolding modified: 0 with status: OK
+2026-02-11 23:34:53.346019937 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer MatMulAddFusion modified: 0 with status: OK
+2026-02-11 23:34:53.346042697 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ReshapeFusion modified: 0 with status: OK
+2026-02-11 23:34:53.346074363 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer FreeDimensionOverrideTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.346098581 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer GeluFusionL1 modified: 0 with status: OK
+2026-02-11 23:34:53.346121184 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer LayerNormFusionL1 modified: 0 with status: OK
+2026-02-11 23:34:53.346143684 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer QDQPropagationTransformer modified: 0 with status: OK
+2026-02-11 23:34:53.346164413 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer WeightBiasQuantization modified: 0 with status: OK
+2026-02-11 23:34:53.346185662 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 0 with status: OK
+2026-02-11 23:34:53.346206130 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer RocmBlasAltImpl modified: 0 with status: OK
+2026-02-11 23:34:53.348724608 [V:onnxruntime:, qnn_backend_manager.cc:1216 SetupBackend] LoadBackend succeed.
+2026-02-11 23:34:53.355937861 [V:onnxruntime:, qnn_backend_manager.cc:1225 SetupBackend] Backend build version: v2.40.0.251030114326_189385
+2026-02-11 23:34:53.356075878 [V:onnxruntime:, qnn_backend_manager.cc:440 InitializeQnnLog] Set Qnn log level: 4
+2026-02-11 23:34:53.357462093 [V:onnxruntime:, qnn_backend_manager.cc:1233 SetupBackend] SetLogger succeed.
+2026-02-11 23:34:53.357607714 [V:onnxruntime:, qnn_backend_manager.cc:1240 SetupBackend] InitializeBackend succeed.
+/prj/qct/webtech_scratch20/mlg_user_admin/qaisw_source_repo/rel/qairt-2.40.0/release/snpe_src/avante-tools/prebuilt/dsp/hexagon-sdk-5.5.5/ipc/fastrpc/rpcmem/src/rpcmem_android.c:38:dummy call to rpcmem_init, rpcmem APIs will be used from libxdsprpc
+2026-02-11 23:34:53.494473438 [V:onnxruntime:, qnn_backend_manager.cc:1247 SetupBackend] CreateDevice succeed.
+2026-02-11 23:34:53.494552498 [V:onnxruntime:, qnn_backend_manager.cc:1254 SetupBackend] InitializeProfiling succeed.
+2026-02-11 23:34:53.494583070 [V:onnxruntime:, qnn_backend_manager.cc:1259 SetupBackend] LoadOpPackage succeed.
+2026-02-11 23:34:53.494604424 [V:onnxruntime:, qnn_backend_manager.cc:1281 SetupBackend] QNN SetupBackend succeed
+2026-02-11 23:34:53.494764160 [V:onnxruntime:, qnn_execution_provider.cc:838 PartitionCtxModel] Node supported: [1] index: [2] name: [QNNContext] Operator type: [EPContext] index: [2]
+2026-02-11 23:34:53.494867230 [I:onnxruntime:, qnn_execution_provider.cc:863 PartitionCtxModel] Number of partitions supported by QNN EP: 1, number of nodes in the graph: 1, number of nodes supported by QNN: 1
+2026-02-11 23:34:53.495037746 [V:onnxruntime:, qnn_backend_manager.cc:1179 SetupBackend] Backend setup already!
+2026-02-11 23:34:53.495076443 [V:onnxruntime:, qnn_execution_provider.cc:838 PartitionCtxModel] Node supported: [1] index: [2] name: [QNNContext] Operator type: [EPContext] index: [2]
+2026-02-11 23:34:53.495140660 [I:onnxruntime:, qnn_execution_provider.cc:863 PartitionCtxModel] Number of partitions supported by QNN EP: 1, number of nodes in the graph: 1, number of nodes supported by QNN: 1
+2026-02-11 23:34:53.495462892 [E:onnxruntime:, onnx_ctx_model_helper.cc:191 LoadQnnCtxFromOnnxGraph] Failed to load from EpContext model. The file path in ep_cache_context does not exist or is not accessible.
+An unexpected error occurred in the main loop: [ONNXRuntimeError] : 10 : INVALID_GRAPH : Failed to load from EpContext model. The file path in ep_cache_context does not exist or is not accessible.
+/prj/qct/webtech_scratch20/mlg_user_admin/qaisw_source_repo/rel/qairt-2.40.0/release/snpe_src/avante-tools/prebuilt/dsp/hexagon-sdk-5.5.5/ipc/fastrpc/rpcmem/src/rpcmem_android.c:42:dummy call to rpcmem_deinit, rpcmem APIs will be used from libxdsprpc
