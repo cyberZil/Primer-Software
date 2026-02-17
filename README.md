@@ -96,12 +96,6 @@ systemctl status ollama
 ollama pull gemma3:1b
 ```
 
-**Download the whisper-tiny Models:**
-Download the whisper models by running the following commands:
-```bash
-wget -P lib/whisper https://huggingface.co/onnx-community/whisper-tiny.en/resolve/main/onnx/decoder_model.onnx
-wget -P lib/whisper https://huggingface.co/onnx-community/whisper-tiny.en/resolve/main/onnx/encoder_model.onnx
-```
 ## 3. Add service to automate running at startup
 
 **Move primer.service to the system folder**
@@ -126,6 +120,13 @@ python3.12 -m venv venv
 ```bash
 source venv/bin/activate
 ```
+**Download the whisper-tiny Models:**
+Download the whisper models by running the following commands:
+```bash
+pip install "optimum-onnx[onnxruntime]" transformers onnx
+optimum-cli export onnx --model openai/whisper-tiny.en whisper
+```
+
 > **Note**: Your command prompt will change (e.g., `(venv)user@host:~...`) indicating the environment is active. You must run this command every time you open a new terminal session.
 
 Install all necessary libraries defined in the `requirements.txt` file.
