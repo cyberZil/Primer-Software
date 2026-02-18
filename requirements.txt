@@ -1,14 +1,20 @@
-requests
+onnxruntime
+sounddevice
+soundfile
+setuptools==80.9.0
+webrtcvad
+whisper
+edge_impulse_linux
 pyaudio
+opencv-python
+spidev
+python-periphery
+Pillow
+#Check if needed
 numpy
 ollama
 spidev
 gpiozero
 librosa
-soundfile
-onnxruntime
 transformers
-python-periphery
-Pillow
-webrtcvad
 requests
