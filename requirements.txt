@@ -3,16 +3,17 @@ sounddevice
 soundfile
 setuptools==80.9.0
 webrtcvad
-whisper
+openai-whisper
 edge_impulse_linux
 pyaudio
 opencv-python
 spidev
 python-periphery
 Pillow
-#Check if needed
-numpy
 ollama
+#Check if needed
+
+
 spidev
 gpiozero
 librosa
