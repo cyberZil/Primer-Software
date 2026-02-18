@@ -62,6 +62,10 @@ cd projects
 git clone https://github.com/XRP-AI-Kit/Primer-Software
 cd Primer-Software
 ```
+**Change Model executable**
+```bash
+chmod +x /home/ubuntu/projects/Primer-Software/lib/model.eim
+```
 
 **Install Python 3.12 and Venv Module:**
 ```bash
@@ -133,7 +137,22 @@ Install all necessary libraries defined in the `requirements.txt` file.
 
 **Install Packages:**
 ```bash
+pip install sounddevice
+pip install 
 pip install -r requirements.txt
+```
+**Setup GPIO & SPI:**
+```bash
+sudo groupadd -f dialout
+sudo usermod -aG dialout $USER
+sudo tee /etc/udev/rules.d/50-spi-gpio.rules >/dev/null <<'RULES'
+SUBSYSTEM=="spidev", GROUP="dialout", MODE="0660"
+SUBSYSTEM=="gpio", KERNEL=="gpiochip*", GROUP="dialout", MODE="0660"
+KERNEL=="gpiomem", GROUP="dialout", MODE="0660"
+RULES
+
+sudo udevadm control --reload-rules && sudo udevadm trigger
+reboot
 ```
 
 The Rubik Pi 3 is now fully configured.
